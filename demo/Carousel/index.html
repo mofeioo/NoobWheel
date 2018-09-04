@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>轮播图</title>
+    <script src="../../lib/mo.js"></script>
+    <style type="text/css">
+        .banner {
+            width: 1130px;
+            height: 300px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .banner .img-item {
+            height: 100%;
+            position: absolute;
+
+        }
+
+        .banner .img-item img {
+            float: left;
+            width: 1130px;
+            height: 300px;
+        }
+
+        .banner .btn {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            list-style: none;
+            position: absolute;
+            right: 5%;
+            bottom: 5%;
+        }
+
+        .banner .btn li {
+            float: left;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            border: 1px solid gray;
+            margin: 3px;
+        }
+
+        .banner .btn .active {
+            background-color: black;
+        }
+
+        .banner > a {
+            display: block;
+            width: 48px;
+            height: 76px;
+        }
+
+        .banner .banner-prev {
+            background: url("./images/prev.png") center center no-repeat;
+            border-radius: 0 4px 4px 0;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            margin-top: -38px;
+        }
+
+        .banner .banner-next {
+            background: url("./images/next.png") center center no-repeat;
+            border-radius: 4px 0 0 4px;
+            position: absolute;
+            top: 50%;
+            right: 0;
+            margin-top: -38px;
+        }
+
+        .banner .banner-prev:hover,
+        .banner .banner-next:hover {
+            background-color: rgba(0, 0, 0, 0.4)
+        }
+    </style>
+</head>
+
+<body>
+<div class="banner">
+    <div class="img-item">
+        <a href="">
+            <img src="https://img.zcool.cn/community/01ba595b719f2ba801215c8f310c71.jpg@1380w"/>
+        </a>
+        <a href="">
+            <img src="https://img.zcool.cn/community/012b445b70f030a801206a357db13f.png@1380w"/>
+        </a>
+        <a href="">
+            <img src="https://img.zcool.cn/community/0124625b70f04da801215c8f7e547d.png@1380w"/>
+        </a>
+        <a href="">
+            <img src="https://img.zcool.cn/community/01ed295b719eaca801215c8fac7c48.jpg@1380w"/>
+        </a>
+        <a href="">
+            <img src="https://img.zcool.cn/community/01ba595b719f2ba801215c8f310c71.jpg@1380w"/>
+        </a>
+    </div>
+    <a href="javascript:;" class="banner-prev"></a>
+    <a href="javascript:;" class="banner-next"></a>
+    <ul class="btn">
+        <li class="active">
+        </li>
+        <li>
+        </li>
+        <li>
+        </li>
+        <li></li>
+    </ul>
+</div>
+</body>
+<script type="text/javascript">
+    //属性
+    //位置生效
+    //改变index 前后  自动  小按钮
+    //放上去停止播放
+
+    function Banner(interval) {
+        this.banner = document.querySelector(".banner");
+        this.interval = interval || 3000;
+        this.timer = null;
+        //每张图索引值
+        this.index = 0;
+        //移动的框
+        this.imgItem = document.querySelector(".banner .img-item");
+        //每张图片
+        this.imgs = document.querySelectorAll(".banner .img-item a img");
+        //上一张
+        this.prev = document.querySelector(".banner .banner-prev");
+        //下一张
+        this.next = document.querySelector(".banner .banner-next");
+        //切换按钮
+        this.btn = document.querySelectorAll(".banner .btn li");
+        this.imgItem.style.width = (this.imgs.length * this.imgs[0].offsetWidth) + "px";
+        // 轮播图位置变换
+        this.changeIndex();
+        this.setBtn();
+        this.pusePlay();
+    }
+
+    Banner.prototype.play = function () {
+        mo.animation(this.imgItem, {
+            left: -this.index * this.imgs[0].offsetWidth
+        })
+    }
+    Banner.prototype.changeIndex = function () {
+        //切换下一张
+        this.next.onclick = function () {
+            if (this.index == this.imgs.length - 1) {
+                this.imgItem.style.left = 0;
+                this.index = 1;
+            } else {
+                this.index++;
+            }
+            this.play();
+            this.setBtn();
+        }.bind(this);
+        //切换上一张        
+        this.prev.onclick = function () {
+            if (this.index == 0) {
+                this.imgItem.style.left = -this.imgs[0].offsetWidth * (this.imgs.length - 1) + "px";
+                this.index = this.imgs.length - 2;
+            } else {
+                this.index--;
+            }
+            this.play();
+        }.bind(this);
+        this.auto();
+        this.setBtn();
+    }
+
+    Banner.prototype.auto = function () {
+        clearInterval(this.timer);
+        this.timer = setInterval(function () {
+            if (this.index == this.imgs.length - 1) {
+                this.imgItem.style.left = 0;
+                this.index = 1;
+            } else {
+                this.index++;
+            }
+            this.play();
+            this.setBtn();
+        }.bind(this), this.interval);
+    }
+    Banner.prototype.setBtn = function () {
+        //btn的选中通过index判断
+        var that = this;
+        for (var i = 0; i < this.btn.length; i++) {
+            if (!this.btn[i].index) {
+                this.btn[i].index = i;
+            }
+            this.btn[i].className = "";
+            this.btn[i].onclick = function () {
+                that.index = this.index;
+                that.play();
+                that.setBtn();
+            }
+        }
+        ;
+
+        if (this.idnex == 0 || this.index == 4) {
+            this.btn[0].className = "active";
+        } else {
+            this.btn[this.index].className = "active";
+        }
+    }
+    Banner.prototype.pusePlay = function () {
+        this.banner.onmouseover = function () {
+            clearInterval(this.timer);
+        }.bind(this)
+
+        this.banner.onmouseout = function () {
+            this.auto();
+        }.bind(this)
+    }
+
+    var banner = new Banner(2000);
+</script>
+
+</html>
